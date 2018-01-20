@@ -6,6 +6,10 @@
   This a library for reading pharmacodes. it is not to be used with pharmaceuticals
   but as a way of reading paper tags in Arduino. The intention is to use pharmacode
   as a concept, no to strictly implement the method.
+  
+  POSITION            7   6  5  4  3 2 1 0
+  FINE BAR VALUE    128  64 32 16  8 4 2 1
+  THICK BAR VALUE   256 128 64 32 16 8 4 2
 
   The strategy of the code is to pulseIn() to detect the length of a band
 
