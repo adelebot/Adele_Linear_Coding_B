@@ -8,6 +8,7 @@
 
 pharmacodeRead pharmacode(NBARS, PIN);//creaes reader for NBARS
 
+byte mode = 1;
 
 void setup() {
   // put your setup code here, to run once:
@@ -16,10 +17,32 @@ void setup() {
   pixelsOff();
   adeleBegin();
   stopServos();
+  if (CircuitPlayground.rightButton()) {
+    CircuitPlayground.playTone(440, 100);
+    CircuitPlayground.setPixelColor(0, 255, 0 , 0);
+    delay(300);
+    CircuitPlayground.setPixelColor(1, 255, 0 , 0);
+    CircuitPlayground.playTone(440, 100);
+    mode = 2;
+  } else {
+    CircuitPlayground.playTone(440, 100);
+    CircuitPlayground.setPixelColor(0, 255, 0 , 0);
+    mode = 1;
+  }
+  delay(1000);
+  CircuitPlayground.setPixelColor(0, 0, 0 , 0);
+  CircuitPlayground.setPixelColor(1, 0, 0 , 0);
 }
 
 void loop() {
-  mode1();
+  switch (mode) {
+    case 1:
+      mode1();
+      break;
+    case 2:
+      mode2();
+      break;
+  }
 }
 
 
@@ -114,10 +137,84 @@ void executeCode() {
 }
 
 
+void mode2() {
+
+  //read code when left button mainteined pressed
+
+  if (CircuitPlayground.leftButton() && !pharmacode.stopState) {
+    pharmacode.readCode();
+    if (pharmacode.stopState) {
+      CircuitPlayground.playTone(440, 100);
+      allPixels(0, 255, 0);
+      delay(500);
+      pixelsOff();
+      delay(300);
+    }
+  }
+
+  if (pharmacode.stopState) {//entire code was read
+    //CircuitPlayground.playTone(440, 100);
+    CircuitPlayground.setPixelColor(9, 255, 100 , 50);
+    CircuitPlayground.setPixelColor(0, 255, 100 , 50);
+    executeCode2();
+  }
+
+  //erase one rule with right button
+  if (CircuitPlayground.rightButton()) {
+    pharmacode.resetCode();
+    stopServos();
+    CircuitPlayground.playTone(880, 100);
+    CircuitPlayground.setPixelColor(9, 0, 0 , 0);
+    CircuitPlayground.setPixelColor(0, 0, 0 , 0);
+    delay(200);//to avoid bouncing
+  }
+  // when siwtch LEFT it executes the rules
+
+}
+
+void executeCode2() {
+
+  switch (pharmacode.result) {
+    case 16://stay inside blak line
+      stayInside();
+      break;
+    case 17://move when sound
+      if (CircuitPlayground.soundSensor() > 900) {
+        CircuitPlayground.setPixelColor(9, 255, 100 , 0);
+        CircuitPlayground.setPixelColor(0, 255, 100 , 0);
+        randomMove(500);
+        randomMove(500);
+        randomMove(500);
+        stopServos();
+        CircuitPlayground.setPixelColor(9, 0, 0 , 0);
+        CircuitPlayground.setPixelColor(0, 0, 0 , 0);
+      }
+      break;
+    case 18://simple line follower
+      followLine();
+      break;
+    case 19://randomwalk
+      randomMove(300);
+      delay(100);
+      break;
+    case 20://just move forward
+      forward();
+      delay(200);
+      break;
+  }
+
+}
+
+
 //turns off all pixels (to avoid using clerPixles)
 void pixelsOff() {
   for (int i = 0; i < 10; i++)
     CircuitPlayground.setPixelColor(i, 0, 0, 0);
+}
+
+void allPixels(byte red, byte green, byte blue) {
+  for (int i = 0; i < 10; i++)
+    CircuitPlayground.setPixelColor(i, red, green, blue);
 }
 
 //set pixel colors depending on code
