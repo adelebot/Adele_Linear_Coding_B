@@ -24,7 +24,7 @@ void setup() {
 
   for (int i = 0; i < 10; i++) {
     CircuitPlayground.setPixelColor(i, CircuitPlayground.colorWheel(25 * i));
-    CircuitPlayground.playTone(500 + i * 500, 250);
+    CircuitPlayground.playTone(500 + i * 500, 150);
   }
   CircuitPlayground.clearPixels();
   CircuitPlayground.setPixelColor(0, CircuitPlayground.strip.Color(128, 0, 128));
