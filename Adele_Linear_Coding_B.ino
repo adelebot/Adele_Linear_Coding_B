@@ -40,8 +40,8 @@ void setup() {
     CircuitPlayground.setPixelColor(1, 255, 0 , 0);
     CircuitPlayground.playTone(440, 100);
     mode = 2;
-  } 
-  if(CircuitPlayground.leftButton()){
+  }
+  if (CircuitPlayground.leftButton()) {
     CircuitPlayground.playTone(440, 100);
     CircuitPlayground.setPixelColor(0, 255, 0 , 0);
     mode = 1;
@@ -131,11 +131,11 @@ void executeCode() {
         delay(600);
         break;
       case 20://openClaw
-        openGarra();
+        closeGarra();
         delay(300);
         break;
       case 21://closeClaw
-        closeGarra();
+        openGarra();
         delay(300);
         break;
       case 22://play tune
@@ -275,8 +275,8 @@ void setPixelRules() {
   }
 }
 
-void executeSerial(){
-   if (SERIALPORT.available() > 0) {
+void executeSerial() {
+  if (SERIALPORT.available() > 0) {
     digitalWrite(13, HIGH);
     cmd = SERIALPORT.readStringUntil('\n');//
     SERIALPORT.println(cmd + " recibido...");
