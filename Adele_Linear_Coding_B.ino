@@ -5,10 +5,14 @@
 
 #define  PIN   6
 #define  NBARS 4
+#define SERIALPORT Serial1
+#define TURNTIME 510
 
 pharmacodeRead pharmacode(NBARS, PIN);//creaes reader for NBARS
 
-byte mode = 1;
+String cmd; //stores commands from serial as string
+
+byte mode = 0;
 
 void setup() {
   // put your setup code here, to run once:
@@ -17,6 +21,18 @@ void setup() {
   pixelsOff();
   adeleBegin();
   stopServos();
+
+  for (int i = 0; i < 10; i++) {
+    CircuitPlayground.setPixelColor(i, CircuitPlayground.colorWheel(25 * i));
+    CircuitPlayground.playTone(500 + i * 500, 250);
+  }
+  CircuitPlayground.clearPixels();
+  CircuitPlayground.setPixelColor(0, CircuitPlayground.strip.Color(128, 0, 128));
+  CircuitPlayground.setPixelColor(9, CircuitPlayground.strip.Color(128, 0, 128));
+  openGarra();
+  SERIALPORT.begin(9600); //Set up Bluetooth
+  SERIALPORT.println("Starting...");
+
   if (CircuitPlayground.rightButton()) {
     CircuitPlayground.playTone(440, 100);
     CircuitPlayground.setPixelColor(0, 255, 0 , 0);
@@ -24,7 +40,8 @@ void setup() {
     CircuitPlayground.setPixelColor(1, 255, 0 , 0);
     CircuitPlayground.playTone(440, 100);
     mode = 2;
-  } else {
+  } 
+  if(CircuitPlayground.leftButton()){
     CircuitPlayground.playTone(440, 100);
     CircuitPlayground.setPixelColor(0, 255, 0 , 0);
     mode = 1;
@@ -36,6 +53,9 @@ void setup() {
 
 void loop() {
   switch (mode) {
+    case 0:
+      executeSerial();
+      break;
     case 1:
       mode1();
       break;
@@ -253,6 +273,68 @@ void setPixelRules() {
         CircuitPlayground.setPixelColor(i, 255, 255, 255);
     }
   }
+}
+
+void executeSerial(){
+   if (SERIALPORT.available() > 0) {
+    digitalWrite(13, HIGH);
+    cmd = SERIALPORT.readStringUntil('\n');//
+    SERIALPORT.println(cmd + " recibido...");
+    SERIALPORT.flush();
+    digitalWrite(13, LOW);
+  }
+  char inChar;// variable for current command
+  for (int i = 0; i < cmd.length(); i++) {
+    inChar = cmd[i];//reads command from string
+    SERIALPORT.println(inChar);
+    switch (inChar) {
+      case 'F'://move forward
+        forward();
+        //  CircuitPlayground.setPixelColor(0, CircuitPlayground.strip.Color(100, 200, 0));
+        //  CircuitPlayground.setPixelColor(9, CircuitPlayground.strip.Color(100, 200, 0));
+        delay(1000);
+        break;
+      case 'B'://move backward
+        backward();
+        delay(1000);
+        break;
+      case 'L'://move left
+        left();
+        delay(TURNTIME);
+        break;
+      case 'R'://move right
+        right();
+        delay(TURNTIME);
+        break;
+      case 'O'://open claw
+        openGarra();
+        delay(750);
+        break;
+      case 'C'://claose claw
+        closeGarra();
+        delay(750);
+        break;
+      case 'N'://play tune
+        CircuitPlayground.playTone(440, 250);
+        CircuitPlayground.playTone(349, 125);
+        CircuitPlayground.playTone(523, 250);
+        break;
+      case 'P':
+        for (int i = 0; i < 10; i++) {
+          CircuitPlayground.setPixelColor(i, CircuitPlayground.colorWheel(25 * i));
+          delay(150);
+        }
+        CircuitPlayground.clearPixels();
+        CircuitPlayground.setPixelColor(0, CircuitPlayground.strip.Color(128, 0, 128));
+        CircuitPlayground.setPixelColor(9, CircuitPlayground.strip.Color(128, 0, 128));
+        break;
+    }
+    stopServos();
+    delay(300);//waits so it each command are seen as discrete moves
+  }
+  stopServos();
+  SERIALPORT.flush();
+  cmd = "";//clears command string to get ready for next
 }
 
 
