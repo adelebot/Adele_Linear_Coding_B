@@ -219,11 +219,7 @@ void executeCode2() {
       randomMove(300);
       delay(100);
       break;
-    case 20://just move forward
-      forward();
-      delay(200);
-      break;
-    case 21:
+    case 20://follow the light
       int luzAhora = CircuitPlayground.lightSensor();
       if (luzAhora >= luzAntes) {
         int t = random(600);
@@ -233,6 +229,10 @@ void executeCode2() {
       forward();
       delay(100);
       luzAntes = luzAhora;
+      break;
+    case 21: //just move forward
+      forward();
+      delay(200);
       break;
   }
 
