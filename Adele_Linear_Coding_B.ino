@@ -14,6 +14,8 @@ String cmd; //stores commands from serial as string
 
 byte mode = 0;
 
+int luzAntes; //variable for follow light behaviour
+
 void setup() {
   // put your setup code here, to run once:
   CircuitPlayground.begin();
@@ -220,6 +222,17 @@ void executeCode2() {
     case 20://just move forward
       forward();
       delay(200);
+      break;
+    case 21:
+      int luzAhora = CircuitPlayground.lightSensor();
+      if (luzAhora >= luzAntes) {
+        int t = random(600);
+        left();
+        delay(t);
+      }
+      forward();
+      delay(100);
+      luzAntes = luzAhora;
       break;
   }
 
